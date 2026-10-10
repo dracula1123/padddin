@@ -273,7 +273,7 @@
             <h1>ODA KODUN</h1>
             <p>Aşağıdaki kodu paddine gönder:</p>
             <div id="roomCodeDisplay" class="code-display">----</div>
-            <div id="hostStatus" class="status-badge">Manitan bekleniyor... 💖</div>
+            <div id="hostStatus" class="status-badge">Manitin bekleniyor... 💖</div>
             <br>
             <button class="btn btn-secondary" onclick="cancelOnlineRoom()">İptal Et</button>
         </div>
@@ -319,15 +319,15 @@
 
             if (type === 'bounce') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
                 gain.gain.setValueAtTime(0.08, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
                 osc.start(now);
                 osc.stop(now + 0.15);
             } else if (type === 'goal') {
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(349.23, now); // F4
+                osc.frequency.setValueAtTime(349.23, now);
                 osc.frequency.linearRampToValueAtTime(174.61, now + 0.35);
                 gain.gain.setValueAtTime(0.15, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
@@ -345,12 +345,12 @@
         }
 
         // Game Configuration & State
-        let mode = 'LOCAL'; // 'LOCAL' or 'ONLINE'
-        let isHost = true;  // Host controls physics in ONLINE mode
-        let gameState = 'MENU'; // 'MENU', 'PLAYING', 'GAMEOVER'
+        let mode = 'LOCAL';
+        let isHost = true;
+        let gameState = 'MENU';
 
-        let score1 = 0; // Bottom player (Player 1 / Host / Local P1)
-        let score2 = 0; // Top player (Player 2 / Client / Local P2)
+        let score1 = 0;
+        let score2 = 0;
 
         const paddleWidth = 95;
         const paddleHeight = 15;
@@ -362,27 +362,22 @@
             x: canvas.width / 2,
             y: canvas.height / 2,
             radius: 12,
-            speedX: 3.5,
-            speedY: 4.5
+            speedX: 4.8,
+            speedY: 6.2
         };
 
         let floatingTexts = [];
         let particles = [];
 
-        // PeerJS Networking Variables
         let peer = null;
         let conn = null;
         let myRoomCode = '';
 
-        // Touch Drag Handling Variables
-        let activeTouches = {};
-
-        // Keyboard State
         let keys = {};
         window.addEventListener('keydown', (e) => { keys[e.code] = true; });
         window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
-        // Touch & Drag Controls
+        // Touch & Drag Controls (Instant & Lag-Free)
         function setupTouchListeners() {
             canvas.addEventListener('touchstart', handleTouch, { passive: false });
             canvas.addEventListener('touchmove', handleTouch, { passive: false });
@@ -401,19 +396,16 @@
                 const canvasY = (touch.clientY - rect.top) * scaleY;
 
                 if (mode === 'LOCAL') {
-                    // Lower screen half controls P1 (bottom), upper half controls P2 (top)
                     if (canvasY > canvas.height / 2) {
                         p1.x = Math.max(10, Math.min(canvas.width - p1.width - 10, canvasX - p1.width / 2));
                     } else {
                         p2.x = Math.max(10, Math.min(canvas.width - p2.width - 10, canvasX - p2.width / 2));
                     }
                 } else {
-                    // Online Mode: Player controls their paddle (Bottom paddle for P1/Host, Bottom paddle for Client from their perspective)
                     if (isHost) {
                         p1.x = Math.max(10, Math.min(canvas.width - p1.width - 10, canvasX - p1.width / 2));
                         sendPaddlePosition(p1.x);
                     } else {
-                        // Client controls their paddle and sends position to Host
                         p2.x = Math.max(10, Math.min(canvas.width - p2.width - 10, canvasX - p2.width / 2));
                         sendPaddlePosition(p2.x);
                     }
@@ -427,16 +419,12 @@
 
         setupTouchListeners();
 
-        // PeerJS Connection Handler
         function initPeerJS(callback) {
             if (peer) return callback();
             
-            // Random 4-character room code
             myRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
             
-            peer = new Peer('lovepulse-' + myRoomCode, {
-                debug: 0
-            });
+            peer = new Peer('lovepulse-' + myRoomCode, { debug: 0 });
 
             peer.on('open', (id) => {
                 callback();
@@ -445,7 +433,7 @@
             peer.on('connection', (connection) => {
                 conn = connection;
                 setupConnectionListeners();
-                document.getElementById('hostStatus').innerText = "Bağ bağlandı 💕 Başlatılıyor...";
+                document.getElementById('hostStatus').innerText = "Bağlantı kuruldu 💕 Başlatılıyor...";
                 showToast("Paddin Bağlandı 💖");
                 setTimeout(() => {
                     hideAllOverlays();
@@ -462,14 +450,11 @@
             conn.on('data', (data) => {
                 if (data.type === 'PADDLE') {
                     if (isHost) {
-                        // Host receives P2 paddle position from Client
                         p2.x = data.x;
                     } else {
-                        // Client receives P1 paddle position from Host
                         p1.x = data.x;
                     }
                 } else if (data.type === 'STATE' && !isHost) {
-                    // Client receives synced ball and scores from Host
                     ball.x = data.ball.x;
                     ball.y = data.ball.y;
                     score1 = data.score1;
@@ -496,14 +481,20 @@
             }
         }
 
+        // Optimize edilmiş 30ms network döngüsü (Zero Lag)
+        let lastSyncTime = 0;
         function sendState() {
             if (conn && conn.open && isHost) {
-                conn.send({
-                    type: 'STATE',
-                    ball: { x: ball.x, y: ball.y },
-                    score1: score1,
-                    score2: score2
-                });
+                const now = Date.now();
+                if (now - lastSyncTime > 25) { // Saniyede ~40 kez ultra akıcı senkronizasyon
+                    conn.send({
+                        type: 'STATE',
+                        ball: { x: ball.x, y: ball.y },
+                        score1: score1,
+                        score2: score2
+                    });
+                    lastSyncTime = now;
+                }
             }
         }
 
@@ -513,7 +504,6 @@
             }
         }
 
-        // Navigation Functions
         function hideAllOverlays() {
             document.querySelectorAll('.overlay').forEach(el => el.classList.add('hidden'));
         }
@@ -522,7 +512,7 @@
             initAudio();
             mode = 'LOCAL';
             document.getElementById('player1Name').innerText = "Sen";
-            document.getElementById('player2Name').innerText = "Sevgilin";
+            document.getElementById('player2Name').innerText = "Paddin";
             hideAllOverlays();
             startNewGame();
         }
@@ -576,18 +566,12 @@
         }
 
         function cancelOnlineRoom() {
-            if (peer) {
-                peer.destroy();
-                peer = null;
-            }
+            if (peer) { peer.destroy(); peer = null; }
             showOnlineMenu();
         }
 
         function backToMain() {
-            if (peer) {
-                peer.destroy();
-                peer = null;
-            }
+            if (peer) { peer.destroy(); peer = null; }
             gameState = 'MENU';
             hideAllOverlays();
             document.getElementById('mainMenu').classList.remove('hidden');
@@ -600,7 +584,6 @@
             setTimeout(() => { toast.style.opacity = 0; }, 2500);
         }
 
-        // Game Logic & Rendering
         function startNewGame() {
             score1 = 0;
             score2 = 0;
@@ -620,8 +603,8 @@
         function resetBall(dir) {
             ball.x = canvas.width / 2;
             ball.y = canvas.height / 2;
-            ball.speedX = (Math.random() > 0.5 ? 1 : -1) * 3.8;
-            ball.speedY = dir * 4.8;
+            ball.speedX = (Math.random() > 0.5 ? 1 : -1) * 4.8;
+            ball.speedY = dir * 6.2;
         }
 
         function updateHUD() {
@@ -664,31 +647,30 @@
 
         const romanticWords = ["Paddinim! 💕", "Canım! ✨", "Canımın Dışı! 💖", "Lağım Farem! 🌸", "Embesilim! 💘"];
 
-        // Main Game Loop
+        // Main Game Loop (Turbo Speed & Zero Lag)
         function loop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (gameState === 'PLAYING') {
-                // Keyboard Controls for Desktop
                 if (keys['ArrowLeft']) {
-                    p1.x -= 7;
+                    p1.x -= 8;
                     if (mode === 'ONLINE' && isHost) sendPaddlePosition(p1.x);
                 }
                 if (keys['ArrowRight']) {
-                    p1.x += 7;
+                    p1.x += 8;
                     if (mode === 'ONLINE' && isHost) sendPaddlePosition(p1.x);
                 }
 
                 if (mode === 'LOCAL') {
-                    if (keys['KeyA']) p2.x -= 7;
-                    if (keys['KeyD']) p2.x += 7;
+                    if (keys['KeyA']) p2.x -= 8;
+                    if (keys['KeyD']) p2.x += 8;
                 } else if (!isHost) {
                     if (keys['KeyA'] || keys['ArrowLeft']) {
-                        p2.x -= 7;
+                        p2.x -= 8;
                         sendPaddlePosition(p2.x);
                     }
                     if (keys['KeyD'] || keys['ArrowRight']) {
-                        p2.x += 7;
+                        p2.x += 8;
                         sendPaddlePosition(p2.x);
                     }
                 }
@@ -696,19 +678,16 @@
                 p1.x = Math.max(10, Math.min(canvas.width - p1.width - 10, p1.x));
                 p2.x = Math.max(10, Math.min(canvas.width - p2.width - 10, p2.x));
 
-                // Host manages physics engine
                 if (mode === 'LOCAL' || isHost) {
                     ball.x += ball.speedX;
                     ball.y += ball.speedY;
 
-                    // Side Wall Bounce
                     if (ball.x - ball.radius < 10 || ball.x + ball.radius > canvas.width - 10) {
                         ball.speedX *= -1;
                         playSound('bounce');
                         if (mode === 'ONLINE') sendEvent('BOUNCE');
                     }
 
-                    // Bottom Paddle (P1) Bounce
                     if (
                         ball.y + ball.radius >= p1.y &&
                         ball.x >= p1.x && ball.x <= p1.x + p1.width &&
@@ -716,7 +695,7 @@
                     ) {
                         ball.speedY *= -1;
                         let hitPoint = (ball.x - (p1.x + p1.width / 2)) / (p1.width / 2);
-                        ball.speedX = hitPoint * 5.2;
+                        ball.speedX = hitPoint * 6.5;
                         playSound('bounce');
 
                         const word = romanticWords[Math.floor(Math.random() * romanticWords.length)];
@@ -729,7 +708,6 @@
                         }
                     }
 
-                    // Top Paddle (P2) Bounce
                     if (
                         ball.y - ball.radius <= p2.y + p2.height &&
                         ball.x >= p2.x && ball.x <= p2.x + p2.width &&
@@ -737,7 +715,7 @@
                     ) {
                         ball.speedY *= -1;
                         let hitPoint = (ball.x - (p2.x + p2.width / 2)) / (p2.width / 2);
-                        ball.speedX = hitPoint * 5.2;
+                        ball.speedX = hitPoint * 6.5;
                         playSound('bounce');
 
                         const word = romanticWords[Math.floor(Math.random() * romanticWords.length)];
@@ -750,7 +728,6 @@
                         }
                     }
 
-                    // Goal Scoring Logic
                     if (ball.y < 0) {
                         playSound('goal');
                         if (mode === 'ONLINE') sendEvent('GOAL');
@@ -778,8 +755,6 @@
             }
 
             // --- CANVAS DRAWING ---
-
-            // Center Net Line
             ctx.strokeStyle = 'rgba(255, 51, 153, 0.2)';
             ctx.setLineDash([8, 8]);
             ctx.beginPath();
@@ -788,7 +763,6 @@
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Bottom Paddle (P1)
             ctx.beginPath();
             ctx.roundRect(p1.x, p1.y, p1.width, p1.height, 8);
             ctx.fillStyle = '#ff3399';
@@ -797,7 +771,6 @@
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Top Paddle (P2)
             ctx.beginPath();
             ctx.roundRect(p2.x, p2.y, p2.width, p2.height, 8);
             ctx.fillStyle = '#ff99cc';
@@ -806,10 +779,8 @@
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Heart Ball
             drawHeart(ball.x, ball.y, 0.85, '#ff0066');
 
-            // Floating Text Animation
             for (let i = floatingTexts.length - 1; i >= 0; i--) {
                 let ft = floatingTexts[i];
                 ft.y -= 0.8;
@@ -826,7 +797,6 @@
                 ctx.fillText(ft.text, ft.x, ft.y);
             }
 
-            // Heart Particle FX
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
                 p.x += p.vx;
