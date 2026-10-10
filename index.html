@@ -20,7 +20,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: radial-gradient(circle at center, #260c2d 0%, #08030b 100%);
+            background: #08030b;
             font-family: 'Orbitron', sans-serif;
             height: 100vh;
             width: 100vw;
@@ -46,9 +46,8 @@
 
         canvas {
             border-radius: 20px;
-            box-shadow: 0 0 50px rgba(255, 0, 128, 0.25), inset 0 0 35px rgba(255, 105, 180, 0.08);
-            background: rgba(18, 8, 24, 0.9);
-            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(255, 0, 128, 0.2);
+            background: #120818;
             border: 1px solid rgba(255, 51, 153, 0.35);
             width: 100%;
             height: 100%;
@@ -72,18 +71,16 @@
         }
 
         .ui-panel div {
-            background: rgba(20, 8, 26, 0.65);
+            background: rgba(20, 8, 26, 0.85);
             padding: 8px 16px;
             border-radius: 12px;
             border: 1px solid rgba(255, 51, 153, 0.25);
-            backdrop-filter: blur(8px);
         }
 
         .ui-panel span {
             color: #ff3399;
             font-weight: 900;
             font-size: 17px;
-            text-shadow: 0 0 10px rgba(255, 51, 153, 0.6);
         }
 
         .overlay {
@@ -92,14 +89,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(8, 3, 12, 0.92);
-            backdrop-filter: blur(16px);
+            background: rgba(8, 3, 12, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
             text-align: center;
             padding: 24px;
             border-radius: 20px;
@@ -115,10 +111,7 @@
             font-weight: 900;
             letter-spacing: 3px;
             margin: 0 0 8px 0;
-            background: linear-gradient(45deg, #ff3399, #ff99cc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 25px rgba(255, 51, 153, 0.5);
+            color: #ff3399;
         }
 
         p {
@@ -139,7 +132,7 @@
         }
 
         .btn {
-            background: linear-gradient(135deg, rgba(255, 51, 153, 0.35), rgba(255, 153, 204, 0.25));
+            background: rgba(255, 51, 153, 0.25);
             border: 1px solid #ff3399;
             color: #ffb3d9;
             padding: 14px 20px;
@@ -149,15 +142,12 @@
             letter-spacing: 2px;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 20px rgba(255, 51, 153, 0.25);
+            transition: background 0.2s ease;
         }
 
-        .btn:hover, .btn:active {
+        .btn:active {
             background: #ff3399;
             color: #120516;
-            box-shadow: 0 0 35px rgba(255, 51, 153, 0.7);
-            transform: translateY(-2px);
         }
 
         .btn-secondary {
@@ -193,7 +183,6 @@
             border-radius: 12px;
             border: 1px dashed #ff3399;
             margin: 15px 0;
-            text-shadow: 0 0 15px rgba(255, 51, 153, 0.6);
         }
 
         .status-badge {
@@ -214,17 +203,16 @@
         .toast-status {
             position: absolute;
             bottom: 20px;
-            background: rgba(255, 51, 153, 0.2);
+            background: rgba(255, 51, 153, 0.3);
             border: 1px solid #ff3399;
             color: #ffccee;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 11px;
-            backdrop-filter: blur(10px);
             z-index: 6;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
         }
     </style>
 </head>
@@ -300,13 +288,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Web Audio API Synth Engine
+        // Web Audio API
         let audioCtx = null;
 
         function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
 
         function playSound(type) {
@@ -320,31 +306,28 @@
             if (type === 'bounce') {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(523.25, now);
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
-                gain.gain.setValueAtTime(0.08, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-                osc.start(now);
-                osc.stop(now + 0.15);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+                gain.gain.setValueAtTime(0.06, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
             } else if (type === 'goal') {
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(349.23, now);
-                osc.frequency.linearRampToValueAtTime(174.61, now + 0.35);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-                osc.start(now);
-                osc.stop(now + 0.35);
+                osc.frequency.linearRampToValueAtTime(174.61, now + 0.25);
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.start(now); osc.stop(now + 0.25);
             } else if (type === 'win') {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(440, now);
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.4);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-                osc.start(now);
-                osc.stop(now + 0.5);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
             }
         }
 
-        // Game Configuration & State
+        // Oyun Konfigürasyonu
         let mode = 'LOCAL';
         let isHost = true;
         let gameState = 'MENU';
@@ -355,19 +338,20 @@
         const paddleWidth = 95;
         const paddleHeight = 15;
 
-        let p1 = { x: canvas.width / 2 - paddleWidth / 2, y: canvas.height - 35, width: paddleWidth, height: paddleHeight };
-        let p2 = { x: canvas.width / 2 - paddleWidth / 2, y: 20, width: paddleWidth, height: paddleHeight };
+        let p1 = { x: canvas.width / 2 - paddleWidth / 2, y: canvas.height - 35, width: paddleWidth, height: paddleHeight, targetX: canvas.width / 2 - paddleWidth / 2 };
+        let p2 = { x: canvas.width / 2 - paddleWidth / 2, y: 20, width: paddleWidth, height: paddleHeight, targetX: canvas.width / 2 - paddleWidth / 2 };
 
         let ball = {
             x: canvas.width / 2,
             y: canvas.height / 2,
+            targetX: canvas.width / 2,
+            targetY: canvas.height / 2,
             radius: 12,
-            speedX: 4.8,
-            speedY: 6.2
+            speedX: 4.5,
+            speedY: 5.8
         };
 
         let floatingTexts = [];
-        let particles = [];
 
         let peer = null;
         let conn = null;
@@ -377,11 +361,9 @@
         window.addEventListener('keydown', (e) => { keys[e.code] = true; });
         window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
-        // Touch & Drag Controls (Instant & Lag-Free)
         function setupTouchListeners() {
             canvas.addEventListener('touchstart', handleTouch, { passive: false });
             canvas.addEventListener('touchmove', handleTouch, { passive: false });
-            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
         }
 
         function handleTouch(e) {
@@ -413,22 +395,14 @@
             }
         }
 
-        function handleTouchEnd(e) {
-            e.preventDefault();
-        }
-
         setupTouchListeners();
 
         function initPeerJS(callback) {
             if (peer) return callback();
-            
             myRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
-            
             peer = new Peer('lovepulse-' + myRoomCode, { debug: 0 });
 
-            peer.on('open', (id) => {
-                callback();
-            });
+            peer.on('open', () => callback());
 
             peer.on('connection', (connection) => {
                 conn = connection;
@@ -438,25 +412,20 @@
                 setTimeout(() => {
                     hideAllOverlays();
                     startNewGame();
-                }, 1000);
+                }, 800);
             });
 
-            peer.on('error', (err) => {
-                showToast("Bağlantı Hatası!");
-            });
+            peer.on('error', () => showToast("Bağlantı Hatası!"));
         }
 
         function setupConnectionListeners() {
             conn.on('data', (data) => {
                 if (data.type === 'PADDLE') {
-                    if (isHost) {
-                        p2.x = data.x;
-                    } else {
-                        p1.x = data.x;
-                    }
+                    if (isHost) p2.targetX = data.x;
+                    else p1.targetX = data.x;
                 } else if (data.type === 'STATE' && !isHost) {
-                    ball.x = data.ball.x;
-                    ball.y = data.ball.y;
+                    ball.targetX = data.ball.x;
+                    ball.targetY = data.ball.y;
                     score1 = data.score1;
                     score2 = data.score2;
                     updateHUD();
@@ -475,26 +444,26 @@
             });
         }
 
+        let lastSendTime = 0;
         function sendPaddlePosition(xPos) {
-            if (conn && conn.open) {
+            const now = Date.now();
+            if (conn && conn.open && now - lastSendTime > 30) {
                 conn.send({ type: 'PADDLE', x: xPos });
+                lastSendTime = now;
             }
         }
 
-        // Optimize edilmiş 30ms network döngüsü (Zero Lag)
-        let lastSyncTime = 0;
+        let lastStateTime = 0;
         function sendState() {
-            if (conn && conn.open && isHost) {
-                const now = Date.now();
-                if (now - lastSyncTime > 25) { // Saniyede ~40 kez ultra akıcı senkronizasyon
-                    conn.send({
-                        type: 'STATE',
-                        ball: { x: ball.x, y: ball.y },
-                        score1: score1,
-                        score2: score2
-                    });
-                    lastSyncTime = now;
-                }
+            const now = Date.now();
+            if (conn && conn.open && isHost && now - lastStateTime > 30) {
+                conn.send({
+                    type: 'STATE',
+                    ball: { x: ball.x, y: ball.y },
+                    score1: score1,
+                    score2: score2
+                });
+                lastStateTime = now;
             }
         }
 
@@ -512,7 +481,7 @@
             initAudio();
             mode = 'LOCAL';
             document.getElementById('player1Name').innerText = "Sen";
-            document.getElementById('player2Name').innerText = "Paddin";
+            document.getElementById('player2Name').innerText = "Sevgilin";
             hideAllOverlays();
             startNewGame();
         }
@@ -543,10 +512,7 @@
         function connectToOnlineRoom() {
             initAudio();
             const code = document.getElementById('roomCodeInput').value.trim();
-            if (code.length < 4) {
-                showToast("Lütfen 4 haneli kodu gir!");
-                return;
-            }
+            if (code.length < 4) return showToast("Lütfen 4 haneli kodu gir!");
 
             initPeerJS(() => {
                 isHost = false;
@@ -581,21 +547,18 @@
             const toast = document.getElementById('toast');
             toast.innerText = msg;
             toast.style.opacity = 1;
-            setTimeout(() => { toast.style.opacity = 0; }, 2500);
+            setTimeout(() => { toast.style.opacity = 0; }, 2000);
         }
 
         function startNewGame() {
-            score1 = 0;
-            score2 = 0;
+            score1 = 0; score2 = 0;
             updateHUD();
             resetBall(1);
             gameState = 'PLAYING';
         }
 
         function restartGame() {
-            if (mode === 'ONLINE' && conn && conn.open) {
-                conn.send({ type: 'RESTART' });
-            }
+            if (mode === 'ONLINE' && conn && conn.open) conn.send({ type: 'RESTART' });
             hideAllOverlays();
             startNewGame();
         }
@@ -603,8 +566,10 @@
         function resetBall(dir) {
             ball.x = canvas.width / 2;
             ball.y = canvas.height / 2;
-            ball.speedX = (Math.random() > 0.5 ? 1 : -1) * 4.8;
-            ball.speedY = dir * 6.2;
+            ball.targetX = ball.x;
+            ball.targetY = ball.y;
+            ball.speedX = (Math.random() > 0.5 ? 1 : -1) * 4.5;
+            ball.speedY = dir * 5.8;
         }
 
         function updateHUD() {
@@ -616,20 +581,6 @@
             floatingTexts.push({ text, x, y, alpha: 1.0 });
         }
 
-        function createHeartParticles(x, y, count) {
-            for (let i = 0; i < count; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * 3 + 1;
-                particles.push({
-                    x, y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    alpha: 1.0,
-                    size: Math.random() * 0.4 + 0.3
-                });
-            }
-        }
-
         function drawHeart(x, y, size, color) {
             ctx.save();
             ctx.beginPath();
@@ -639,19 +590,18 @@
             ctx.bezierCurveTo(-10, -10, -20, 10, 0, 20);
             ctx.bezierCurveTo(20, 10, 10, -10, 0, 0);
             ctx.fillStyle = color;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = color;
             ctx.fill();
             ctx.restore();
         }
 
         const romanticWords = ["Paddinim! 💕", "Canım! ✨", "Canımın Dışı! 💖", "Lağım Farem! 🌸", "Embesilim! 💘"];
 
-        // Main Game Loop (Turbo Speed & Zero Lag)
+        // Oyun Döngüsü
         function loop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (gameState === 'PLAYING') {
+                // Klavye Girdileri
                 if (keys['ArrowLeft']) {
                     p1.x -= 8;
                     if (mode === 'ONLINE' && isHost) sendPaddlePosition(p1.x);
@@ -675,9 +625,21 @@
                     }
                 }
 
+                // Yumuşak Geçiş (Lerp) - Takılma Önleyici
+                if (mode === 'ONLINE') {
+                    if (isHost) {
+                        p2.x += (p2.targetX - p2.x) * 0.35;
+                    } else {
+                        p1.x += (p1.targetX - p1.x) * 0.35;
+                        ball.x += (ball.targetX - ball.x) * 0.35;
+                        ball.y += (ball.targetY - ball.y) * 0.35;
+                    }
+                }
+
                 p1.x = Math.max(10, Math.min(canvas.width - p1.width - 10, p1.x));
                 p2.x = Math.max(10, Math.min(canvas.width - p2.width - 10, p2.x));
 
+                // Fizik Hesaplama (Sadece Host veya Local)
                 if (mode === 'LOCAL' || isHost) {
                     ball.x += ball.speedX;
                     ball.y += ball.speedY;
@@ -695,12 +657,11 @@
                     ) {
                         ball.speedY *= -1;
                         let hitPoint = (ball.x - (p1.x + p1.width / 2)) / (p1.width / 2);
-                        ball.speedX = hitPoint * 6.5;
+                        ball.speedX = hitPoint * 6.0;
                         playSound('bounce');
 
                         const word = romanticWords[Math.floor(Math.random() * romanticWords.length)];
                         addFloatingText(word, ball.x, ball.y - 25);
-                        createHeartParticles(ball.x, ball.y, 8);
 
                         if (mode === 'ONLINE') {
                             sendEvent('BOUNCE');
@@ -715,12 +676,11 @@
                     ) {
                         ball.speedY *= -1;
                         let hitPoint = (ball.x - (p2.x + p2.width / 2)) / (p2.width / 2);
-                        ball.speedX = hitPoint * 6.5;
+                        ball.speedX = hitPoint * 6.0;
                         playSound('bounce');
 
                         const word = romanticWords[Math.floor(Math.random() * romanticWords.length)];
                         addFloatingText(word, ball.x, ball.y + 25);
-                        createHeartParticles(ball.x, ball.y, 8);
 
                         if (mode === 'ONLINE') {
                             sendEvent('BOUNCE');
@@ -754,7 +714,7 @@
                 }
             }
 
-            // --- CANVAS DRAWING ---
+            // ÇİZİMLER (Hafif ve Performanslı)
             ctx.strokeStyle = 'rgba(255, 51, 153, 0.2)';
             ctx.setLineDash([8, 8]);
             ctx.beginPath();
@@ -763,28 +723,26 @@
             ctx.stroke();
             ctx.setLineDash([]);
 
+            // P1 Raket
             ctx.beginPath();
             ctx.roundRect(p1.x, p1.y, p1.width, p1.height, 8);
             ctx.fillStyle = '#ff3399';
-            ctx.shadowBlur = 18;
-            ctx.shadowColor = '#ff3399';
             ctx.fill();
-            ctx.shadowBlur = 0;
 
+            // P2 Raket
             ctx.beginPath();
             ctx.roundRect(p2.x, p2.y, p2.width, p2.height, 8);
             ctx.fillStyle = '#ff99cc';
-            ctx.shadowBlur = 18;
-            ctx.shadowColor = '#ff99cc';
             ctx.fill();
-            ctx.shadowBlur = 0;
 
+            // Kalp Topu
             drawHeart(ball.x, ball.y, 0.85, '#ff0066');
 
+            // Uçan Yazılar
             for (let i = floatingTexts.length - 1; i >= 0; i--) {
                 let ft = floatingTexts[i];
                 ft.y -= 0.8;
-                ft.alpha -= 0.025;
+                ft.alpha -= 0.03;
 
                 if (ft.alpha <= 0) {
                     floatingTexts.splice(i, 1);
@@ -795,20 +753,6 @@
                 ctx.fillStyle = `rgba(255, 179, 217, ${ft.alpha})`;
                 ctx.textAlign = 'center';
                 ctx.fillText(ft.text, ft.x, ft.y);
-            }
-
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.alpha -= 0.03;
-
-                if (p.alpha <= 0) {
-                    particles.splice(i, 1);
-                    continue;
-                }
-
-                drawHeart(p.x, p.y, p.size * p.alpha, `rgba(255, 51, 153, ${p.alpha})`);
             }
 
             requestAnimationFrame(loop);
